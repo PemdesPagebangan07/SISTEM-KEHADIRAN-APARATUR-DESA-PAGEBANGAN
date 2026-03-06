@@ -36,6 +36,11 @@ db.exec(`
     FOREIGN KEY (aparatur_id) REFERENCES aparatur (id),
     UNIQUE(aparatur_id, month)
   );
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+  );
 `);
 
 // Seed data if empty
@@ -63,9 +68,20 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
 
   // API Routes
+  app.get("/api/settings/logo", (req, res) => {
+    const row = db.prepare("SELECT value FROM settings WHERE key = 'logo'").get() as any;
+    res.json({ logo: row ? row.value : null });
+  });
+
+  app.post("/api/settings/logo", (req, res) => {
+    const { logo } = req.body;
+    db.prepare("INSERT INTO settings (key, value) VALUES ('logo', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(logo);
+    res.json({ success: true });
+  });
+
   app.get("/api/aparatur", (req, res) => {
     const aparatur = db.prepare("SELECT * FROM aparatur ORDER BY id ASC").all();
     res.json(aparatur);
@@ -105,7 +121,7 @@ async function startServer() {
   // Holiday & Cuti Bersama 2026 (Approximate/User List)
   const holidays2026 = [
     "2026-01-01", // Tahun Baru 2026 Masehi
-    "2026-02-14", // Isra Mikraj Nabi Muhammad SAW
+    "2026-01-16", // Isra Mikraj Nabi Muhammad SAW
     "2026-02-17", // Tahun Baru Imlek 2577 Kongzili
     "2026-02-18", // Cuti Bersama Tahun Baru Imlek
     "2026-03-19", // Hari Suci Nyepi Tahun Baru Saka 1948
@@ -164,16 +180,25 @@ async function startServer() {
 
       const note = db.prepare("SELECT note FROM recap_notes WHERE aparatur_id = ? AND month = ?").get(person.id, month) as any;
 
+      const ijin = stats.ijin || 0;
+      const sakit = stats.sakit || 0;
+      const cuti = stats.cuti || 0;
+      const dinas = stats.dinas || 0;
+      const tk = stats.tk || 0;
+      
+      // Calculate hadir as working days minus any absences
+      const hadir = Math.max(0, workingDays - (ijin + sakit + cuti + dinas + tk));
+
       return {
         ...person,
         note: note ? note.note : "",
         stats: {
-          hadir: stats.hadir || 0,
-          ijin: stats.ijin || 0,
-          sakit: stats.sakit || 0,
-          cuti: stats.cuti || 0,
-          dinas: stats.dinas || 0,
-          tk: stats.tk || 0
+          hadir,
+          ijin,
+          sakit,
+          cuti,
+          dinas,
+          tk
         }
       };
     });

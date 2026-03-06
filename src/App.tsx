@@ -52,7 +52,7 @@ interface RecapItem {
   };
 }
 
-type View = "daily" | "recap" | "aparatur" | "monthly";
+type View = "daily" | "recap" | "aparatur" | "monthly" | "profil";
 
 export default function App() {
   const [view, setView] = useState<View>("daily");
@@ -65,33 +65,35 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
   const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [logoBase64, setLogoBase64] = useState<string>(KEBUMEN_LOGO);
+  const [printOrientation, setPrintOrientation] = useState<"portrait" | "landscape">("portrait");
   
-  const holidays2026: Record<string, { name: string, type: "LN" | "CB" }> = {
-    "2026-01-01": { name: "Tahun Baru 2026 Masehi", type: "LN" },
-    "2026-02-14": { name: "Isra Mikraj Nabi Muhammad SAW", type: "LN" },
-    "2026-02-17": { name: "Tahun Baru Imlek 2577 Kongzili", type: "LN" },
-    "2026-02-18": { name: "Cuti Bersama Tahun Baru Imlek", type: "CB" },
-    "2026-03-19": { name: "Hari Suci Nyepi Tahun Baru Saka 1948", type: "LN" },
-    "2026-03-20": { name: "Hari Raya Idul Fitri 1447 Hijriah", type: "LN" },
-    "2026-03-21": { name: "Hari Raya Idul Fitri 1447 Hijriah", type: "LN" },
-    "2026-03-23": { name: "Cuti Bersama Idul Fitri 1447 Hijriah", type: "CB" },
-    "2026-03-24": { name: "Cuti Bersama Idul Fitri 1447 Hijriah", type: "CB" },
-    "2026-03-25": { name: "Cuti Bersama Idul Fitri 1447 Hijriah", type: "CB" },
-    "2026-04-03": { name: "Wafat Yesus Kristus", type: "LN" },
-    "2026-04-05": { name: "Kebangkitan Yesus Kristus (Paskah)", type: "LN" },
-    "2026-05-01": { name: "Hari Buruh Internasional", type: "LN" },
-    "2026-05-14": { name: "Kenaikan Yesus Kristus", type: "LN" },
-    "2026-05-15": { name: "Cuti Bersama Kenaikan Yesus Kristus", type: "CB" },
-    "2026-06-01": { name: "Hari Lahir Pancasila", type: "LN" },
-    "2026-05-22": { name: "Hari Raya Waisak 2570 BE", type: "LN" },
-    "2026-05-27": { name: "Idul Adha 1447 Hijriah", type: "LN" },
-    "2026-05-28": { name: "Cuti Bersama Idul Adha", type: "CB" },
-    "2026-06-16": { name: "Tahun Baru Islam 1448 Hijriah", type: "LN" },
-    "2026-08-17": { name: "Proklamasi Kemerdekaan RI", type: "LN" },
-    "2026-08-25": { name: "Maulid Nabi Muhammad SAW", type: "LN" },
-    "2026-12-24": { name: "Cuti Bersama Natal", type: "CB" },
-    "2026-12-25": { name: "Kelahiran Yesus Kristus (Natal)", type: "LN" },
-    "2026-12-26": { name: "Cuti Bersama Natal", type: "CB" },
+  const holidays2026: Record<string, { name: string, type: "L" | "C" }> = {
+    "2026-01-01": { name: "Tahun Baru 2026 Masehi", type: "L" },
+    "2026-01-16": { name: "Isra Mikraj Nabi Muhammad SAW", type: "L" },
+    "2026-02-17": { name: "Tahun Baru Imlek 2577 Kongzili", type: "L" },
+    "2026-02-18": { name: "Cuti Bersama Tahun Baru Imlek", type: "C" },
+    "2026-03-19": { name: "Hari Suci Nyepi Tahun Baru Saka 1948", type: "L" },
+    "2026-03-20": { name: "Hari Raya Idul Fitri 1447 Hijriah", type: "L" },
+    "2026-03-21": { name: "Hari Raya Idul Fitri 1447 Hijriah", type: "L" },
+    "2026-03-23": { name: "Cuti Bersama Idul Fitri 1447 Hijriah", type: "C" },
+    "2026-03-24": { name: "Cuti Bersama Idul Fitri 1447 Hijriah", type: "C" },
+    "2026-03-25": { name: "Cuti Bersama Idul Fitri 1447 Hijriah", type: "C" },
+    "2026-04-03": { name: "Wafat Yesus Kristus", type: "L" },
+    "2026-04-05": { name: "Kebangkitan Yesus Kristus (Paskah)", type: "L" },
+    "2026-05-01": { name: "Hari Buruh Internasional", type: "L" },
+    "2026-05-14": { name: "Kenaikan Yesus Kristus", type: "L" },
+    "2026-05-15": { name: "Cuti Bersama Kenaikan Yesus Kristus", type: "C" },
+    "2026-06-01": { name: "Hari Lahir Pancasila", type: "L" },
+    "2026-05-22": { name: "Hari Raya Waisak 2570 BE", type: "L" },
+    "2026-05-27": { name: "Idul Adha 1447 Hijriah", type: "L" },
+    "2026-05-28": { name: "Cuti Bersama Idul Adha", type: "C" },
+    "2026-06-16": { name: "Tahun Baru Islam 1448 Hijriah", type: "L" },
+    "2026-08-17": { name: "Proklamasi Kemerdekaan RI", type: "L" },
+    "2026-08-25": { name: "Maulid Nabi Muhammad SAW", type: "L" },
+    "2026-12-24": { name: "Cuti Bersama Natal", type: "C" },
+    "2026-12-25": { name: "Kelahiran Yesus Kristus (Natal)", type: "L" },
+    "2026-12-26": { name: "Cuti Bersama Natal", type: "C" },
   };
 
   const getDayInfo = (dateStr: string) => {
@@ -117,6 +119,7 @@ export default function App() {
     if (monthParam) setCurrentMonth(monthParam);
     
     fetchAparatur();
+    fetchLogo();
 
     if (printParam === "true") {
       // Small delay to ensure data is fetched before printing
@@ -125,6 +128,47 @@ export default function App() {
       }, 1500);
     }
   }, []);
+
+  const fetchLogo = async () => {
+    try {
+      const res = await fetch("/api/settings/logo");
+      const data = await res.json();
+      if (data.logo) {
+        setLogoBase64(data.logo);
+      }
+    } catch (error) {
+      console.error("Error fetching logo:", error);
+    }
+  };
+
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setLogoBase64(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveLogo = async () => {
+    try {
+      setLoading(true);
+      await fetch("/api/settings/logo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo: logoBase64 }),
+      });
+      alert("Logo berhasil disimpan secara permanen.");
+    } catch (error) {
+      console.error("Error saving logo:", error);
+      alert("Gagal menyimpan logo.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchAparatur = async () => {
     try {
@@ -137,7 +181,7 @@ export default function App() {
   };
 
   const handlePrint = (printView: View = "recap") => {
-    const printUrl = `${window.location.origin}${window.location.pathname}?view=${printView}&month=${currentMonth}&print=true`;
+    const printUrl = `${window.location.origin}${window.location.pathname}?view=${printView}&month=${currentMonth}&print=true&orientation=${printOrientation}`;
     window.open(printUrl, "_blank");
   };
 
@@ -276,6 +320,30 @@ export default function App() {
     }
   };
 
+  const handleMonthlyGridEdit = async (aparaturId: number, dateStr: string, value: string) => {
+    const upperValue = value.toUpperCase();
+    let status = "Hadir";
+    if (upperValue === "I") status = "Izin";
+    else if (upperValue === "S") status = "Sakit";
+    else if (upperValue === "C") status = "Cuti";
+    else if (upperValue === "D") status = "Dinas";
+    else if (upperValue === "TK") status = "Alpa";
+    else if (upperValue === "" || upperValue === "V" || upperValue === "✓") status = "Hadir";
+    else return; // Ignore invalid inputs
+
+    try {
+      await fetch("/api/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ aparatur_id: aparaturId, status, date: dateStr }),
+      });
+      fetchMonthlyLogs();
+      fetchRecap();
+    } catch (error) {
+      console.error("Error updating attendance:", error);
+    }
+  };
+
   const getStatusColor = (status: string | null) => {
     switch (status) {
       case "Hadir": return "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -284,11 +352,11 @@ export default function App() {
       case "Cuti": return "bg-purple-100 text-purple-700 border-purple-200";
       case "Dinas": return "bg-indigo-100 text-indigo-700 border-indigo-200";
       case "Alpa": return "bg-rose-100 text-rose-700 border-rose-200";
-      case "LN":
-      case "CB":
+      case "L":
+      case "C":
       case "LP":
-      case "Libur Nasional (LN)":
-      case "Cuti Bersama (CB)":
+      case "Libur Nasional (L)":
+      case "Cuti Bersama (C)":
       case "Libur Akhir Pekan":
         return "bg-rose-100 text-rose-700 border-rose-200";
       default: return "bg-slate-100 text-slate-500 border-slate-200";
@@ -300,14 +368,17 @@ export default function App() {
   const monthName = monthNames[parseInt(month) - 1];
 
   // Check if we are in print mode
-  const isPrintMode = new URLSearchParams(window.location.search).get("print") === "true";
+  const searchParams = new URLSearchParams(window.location.search);
+  const isPrintMode = searchParams.get("print") === "true";
+  const urlOrientation = searchParams.get("orientation") as "portrait" | "landscape" | null;
 
   if (isPrintMode && (view === "recap" || view === "monthly")) {
+    const finalOrientation = urlOrientation || (view === "monthly" ? "landscape" : "portrait");
     return (
       <div className="bg-white p-0">
         <style>{`
-          @page { size: A4 ${view === "monthly" ? "landscape" : "portrait"}; margin: 10mm; }
-          body { background: white; -webkit-print-color-adjust: exact; }
+          @page { size: A4 ${finalOrientation}; margin: 0; }
+          body { background: white; -webkit-print-color-adjust: exact; padding: 10mm; }
           .print-content { width: 100%; margin: 0 auto; }
           table { border-collapse: collapse; width: 100%; }
           th, td { border: 2px solid black !important; }
@@ -315,7 +386,7 @@ export default function App() {
         <div className="print-content">
           {/* Kop Surat */}
           <div className="relative flex items-center justify-center mb-8 border-b-4 border-double border-slate-900 pb-6">
-            <img src={KEBUMEN_LOGO} alt="Kebumen Logo" className="absolute left-0 w-20 h-20 object-contain" referrerPolicy="no-referrer" />
+            <img src={logoBase64} alt="Kebumen Logo" className="absolute left-0 w-20 h-20 object-contain" referrerPolicy="no-referrer" />
             <div className="text-center">
               <h3 className="text-lg font-bold">PEMERINTAH KABUPATEN KEBUMEN</h3>
               <h3 className="text-lg font-bold">KECAMATAN KARANGGAYAM</h3>
@@ -330,25 +401,27 @@ export default function App() {
               <div className="text-center mb-8">
                 <h4 className="font-bold underline uppercase text-sm">REKAPITULASI DAFTAR KEHADIRAN APARATUR PEMERINTAH DESA</h4>
                 <h4 className="font-bold uppercase text-sm">DESA PAGEBANGAN KECAMATAN KARANGGAYAM</h4>
-                <div className="flex justify-center gap-8 mt-4 font-bold text-xs">
+                <div className="flex justify-start gap-12 mt-4 font-bold text-xs">
                   <span>BULAN : {monthName}</span>
                   <span>TAHUN : {year}</span>
-                  <span>HARI KERJA : {workingDays} HARI</span>
                 </div>
               </div>
 
           <table className="w-full border-collapse border-2 border-slate-900 text-[10px]">
             <thead>
-              <tr className="bg-slate-100">
-                <th rowSpan={2} className="border-2 border-slate-900 px-1 py-2 text-center w-8">NO</th>
-                <th rowSpan={2} className="border-2 border-slate-900 px-2 py-2 text-center">NAMA</th>
-                <th rowSpan={2} className="border-2 border-slate-900 px-2 py-2 text-center">NIAPD</th>
-                <th rowSpan={2} className="border-2 border-slate-900 px-2 py-2 text-center">JABATAN</th>
-                <th rowSpan={2} className="border-2 border-slate-900 px-1 py-2 text-center w-12">HADIR</th>
-                <th colSpan={5} className="border-2 border-slate-900 px-1 py-1 text-center">JUMLAH HARI TIDAK HADIR</th>
-                <th rowSpan={2} className="border-2 border-slate-900 px-2 py-2 text-center w-20">KET</th>
+              <tr className="bg-white">
+                <th rowSpan={3} className="border-2 border-slate-900 px-1 py-2 text-center w-8">NO</th>
+                <th rowSpan={3} className="border-2 border-slate-900 px-2 py-2 text-center">NAMA</th>
+                <th rowSpan={3} className="border-2 border-slate-900 px-2 py-2 text-center">JABATAN</th>
+                <th rowSpan={3} className="border-2 border-slate-900 px-2 py-2 text-center">NIAPD</th>
+                <th rowSpan={3} className="border-2 border-slate-900 px-1 py-2 text-center w-12">HADIR</th>
+                <th colSpan={5} className="border-2 border-slate-900 px-1 py-1 text-center">JUMLAH HARI</th>
+                <th rowSpan={3} className="border-2 border-slate-900 px-2 py-2 text-center w-20">KET</th>
               </tr>
-              <tr className="bg-slate-100">
+              <tr className="bg-white">
+                <th colSpan={5} className="border-2 border-slate-900 px-1 py-1 text-center">TIDAK HADIR</th>
+              </tr>
+              <tr className="bg-white">
                 <th className="border-2 border-slate-900 px-1 py-1 text-center w-8">IJIN</th>
                 <th className="border-2 border-slate-900 px-1 py-1 text-center w-8">SAKIT</th>
                 <th className="border-2 border-slate-900 px-1 py-1 text-center w-8">CUTI</th>
@@ -361,8 +434,8 @@ export default function App() {
                 <tr key={item.id}>
                   <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{idx + 1}</td>
                   <td className="border-2 border-slate-900 px-2 py-1.5 font-bold uppercase">{item.name}</td>
-                  <td className="border-2 border-slate-900 px-2 py-1.5 font-mono text-[9px]">{item.niapd}</td>
                   <td className="border-2 border-slate-900 px-2 py-1.5 uppercase">{item.position}</td>
+                  <td className="border-2 border-slate-900 px-2 py-1.5 font-mono text-[9px] text-center">{item.niapd}</td>
                   <td className="border-2 border-slate-900 px-1 py-1.5 text-center font-bold">{item.stats.hadir}</td>
                   <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{item.stats.ijin}</td>
                   <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{item.stats.sakit}</td>
@@ -372,6 +445,16 @@ export default function App() {
                   <td className="border-2 border-slate-900 px-2 py-1.5">{item.note}</td>
                 </tr>
               ))}
+              <tr className="bg-slate-100 font-bold">
+                <td colSpan={4} className="border-2 border-slate-900 px-2 py-1.5 text-center">JUMLAH</td>
+                <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{recap.reduce((acc, curr) => acc + curr.stats.hadir, 0)}</td>
+                <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{recap.reduce((acc, curr) => acc + curr.stats.ijin, 0)}</td>
+                <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{recap.reduce((acc, curr) => acc + curr.stats.sakit, 0)}</td>
+                <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{recap.reduce((acc, curr) => acc + curr.stats.cuti, 0)}</td>
+                <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{recap.reduce((acc, curr) => acc + curr.stats.dinas, 0)}</td>
+                <td className="border-2 border-slate-900 px-1 py-1.5 text-center">{recap.reduce((acc, curr) => acc + curr.stats.tk, 0)}</td>
+                <td className="border-2 border-slate-900 px-2 py-1.5"></td>
+              </tr>
             </tbody>
           </table>
             </>
@@ -385,30 +468,31 @@ export default function App() {
 
               <table className="w-full border-collapse border-2 border-slate-900 text-[8px]">
                 <thead>
-                  <tr className="bg-emerald-500 text-white">
+                  <tr className="bg-[#92d050] text-black">
                     <th rowSpan={2} className="border-2 border-slate-900 px-1 py-2 text-center w-6">NO.</th>
                     <th rowSpan={2} className="border-2 border-slate-900 px-2 py-2 text-center w-32">N A M A</th>
                     <th rowSpan={2} className="border-2 border-slate-900 px-2 py-2 text-center w-24">NIAPD</th>
                     <th colSpan={31} className="border-2 border-slate-900 px-1 py-1 text-center">T A N G G A L</th>
-                    <th colSpan={6} className="border-2 border-slate-900 px-1 py-1 text-center">KET</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">I</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">S</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">C</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">D</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">TK</th>
+                    <th colSpan={2} className="border-2 border-slate-900 px-1 py-1 text-center bg-[#ffc000]">JUMLAH</th>
                   </tr>
-                  <tr className="bg-emerald-500 text-white">
+                  <tr className="bg-[#92d050] text-black">
                     {Array.from({ length: 31 }).map((_, i) => {
                       const dateStr = `${currentMonth}-${String(i + 1).padStart(2, '0')}`;
                       const info = getDayInfo(dateStr);
                       const isHoliday = info.holiday || info.isWeekend;
                       return (
-                        <th key={i} className={`border-2 border-slate-900 px-0.5 py-1 text-center w-5 ${isHoliday ? 'bg-rose-600' : ''}`}>
+                        <th key={i} className={`border-2 border-slate-900 px-0.5 py-1 text-center w-5 ${isHoliday ? 'bg-rose-600 text-white' : ''}`}>
                           {i + 1}
                         </th>
                       );
                     })}
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">A</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">I</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">S</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">P</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">C</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">DL</th>
+                    <th className="border-2 border-slate-900 px-1 py-1 text-center w-10 bg-[#ffc000]">HADIR</th>
+                    <th className="border-2 border-slate-900 px-1 py-1 text-center w-10 bg-[#ffc000]">TIDAK<br/>HADIR</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -425,26 +509,32 @@ export default function App() {
                         const log = monthlyLogs.find(l => l.aparatur_id === item.id && l.date === dateStr);
                         let content = "";
                         if (log) {
-                          if (log.status === "Hadir") content = "H";
+                          if (log.status === "Hadir") content = "✓";
                           else if (log.status === "Izin") content = "I";
                           else if (log.status === "Sakit") content = "S";
                           else if (log.status === "Cuti") content = "C";
                           else if (log.status === "Dinas") content = "D";
-                          else if (log.status === "Alpa") content = "A";
-                        } else if (info.holiday) content = info.holiday.type;
-                        else if (info.isWeekend) content = "LP";
+                          else if (log.status === "Alpa") content = "TK";
+                        } else if (info.holiday) {
+                          content = info.holiday.type;
+                        } else if (info.isWeekend) {
+                          content = "LP";
+                        } else if (day <= new Date(parseInt(currentMonth.split('-')[0]), parseInt(currentMonth.split('-')[1]), 0).getDate()) {
+                          content = "✓";
+                        }
                         return (
                           <td key={i} className={`border-2 border-slate-900 px-0.5 py-1 text-center ${isHoliday ? 'bg-rose-50 text-rose-600 font-bold' : ''}`}>
                             {content}
                           </td>
                         );
                       })}
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.tk}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.ijin}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.sakit}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.dinas}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.cuti}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center text-[7px]">{item.note}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.ijin > 0 ? item.stats.ijin : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.sakit > 0 ? item.stats.sakit : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.cuti > 0 ? item.stats.cuti : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.dinas > 0 ? item.stats.dinas : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.tk > 0 ? item.stats.tk : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#fff2cc]">{item.stats.hadir > 0 ? item.stats.hadir : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#fff2cc]">{(item.stats.ijin + item.stats.sakit + item.stats.cuti + item.stats.tk) > 0 ? (item.stats.ijin + item.stats.sakit + item.stats.cuti + item.stats.tk) : ''}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -452,26 +542,28 @@ export default function App() {
             </>
           )}
 
-          <div className="mt-8 grid grid-cols-3 gap-8 text-[10px]">
-            <div className="space-y-1">
+          <div className="mt-4 flex justify-between text-[10px]">
+            <div className="w-1/3 space-y-1">
               {view === "monthly" && (
                 <>
-                  <p className="italic underline">Keterangan Hari Libur Nasional dan Cuti Bersama:</p>
+                  <p className="italic">Keterangan Hari Libur Nasional dan Cuti Bersama:</p>
                   {Object.entries(holidays2026)
                     .filter(([date]) => date.startsWith(currentMonth))
                     .map(([date, holiday]) => (
                       <p key={date}>{parseInt(date.split('-')[2])} : {holiday.name}</p>
                     ))
                   }
-                  <div className="mt-4 space-y-0.5">
-                    <p className="italic underline">Keterangan Ketidakhadiran:</p>
-                    <p>L : Libur Nasional/ Hari Raya dan Peringatan Hari Besar</p>
-                    <p>A : Alpa</p>
-                    <p>I : Izin</p>
-                    <p>S : Sakit</p>
-                    <p>P : Pertemuan/ Pelatihan</p>
-                    <p>C : Cuti/ Cuti Bersama</p>
-                    <p>DL : Dinas Luar</p>
+                  <div className="mt-4">
+                    <table className="w-auto text-left border-collapse">
+                      <tbody>
+                        <tr><td colSpan={3} className="italic border border-slate-300 px-1">Keterangan Ketidakhadiran:</td></tr>
+                        <tr><td className="w-6 border border-slate-300 px-1">I</td><td className="w-2 border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Izin</td></tr>
+                        <tr><td className="border border-slate-300 px-1">S</td><td className="border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Sakit</td></tr>
+                        <tr><td className="border border-slate-300 px-1">C</td><td className="border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Cuti</td></tr>
+                        <tr><td className="border border-slate-300 px-1">D</td><td className="border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Dinas Luar</td></tr>
+                        <tr><td className="border border-slate-300 px-1">TK</td><td className="border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Tanpa Keterangan</td></tr>
+                      </tbody>
+                    </table>
                   </div>
                 </>
               )}
@@ -482,32 +574,69 @@ export default function App() {
                   <p>Tidak Hadir {recap.filter(r => r.stats.hadir === 0).length} Orang</p>
                   <div className="mt-4">
                     <p className="font-bold underline">Keterangan Tidak Hadir</p>
+                    <p className="font-bold underline">Keterangan Tidak Hadir</p>
                     <p>Ijin (I) {recap.reduce((acc, curr) => acc + curr.stats.ijin, 0)} Orang</p>
                     <p>Sakit (S) {recap.reduce((acc, curr) => acc + curr.stats.sakit, 0)} Orang</p>
                     <p>Cuti (C) {recap.reduce((acc, curr) => acc + curr.stats.cuti, 0)} Orang</p>
+                    <p>Dinas (D) {recap.reduce((acc, curr) => acc + curr.stats.dinas, 0)} Orang</p>
                     <p>Tanpa Keterangan (TK) {recap.reduce((acc, curr) => acc + curr.stats.tk, 0)} Orang</p>
+                  </div>
+                  <div className="mt-8 border border-slate-300 p-2 text-xs">
+                    <p>Keterangan</p>
+                    <p>Dinas (D) yaitu Aparatur Pemerintah Desa pada hari yang berkenan melaksanakan perjalanan dinas dalam daerah atau perjalanan dinas luar daerah.</p>
                   </div>
                 </>
               )}
             </div>
-            <div className="text-center flex flex-col items-center justify-end">
-              <p>Mengetahui,</p>
-              <p className="font-bold uppercase">KEPALA DESA PAGEBANGAN</p>
-              <div className="h-20"></div>
-              <p className="font-bold underline uppercase">
-                {recap.find(r => r.position.toLowerCase() === "kepala desa")?.name || "...................................."}
-              </p>
-              <p className="text-[9px]">{recap.find(r => r.position.toLowerCase() === "kepala desa")?.niapd || ""}</p>
-            </div>
-            <div className="text-center flex flex-col items-center justify-end">
-              <p>Pagebangan, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-              <p>Petugas Daftar Hadir</p>
-              <div className="h-20"></div>
-              <p className="font-bold underline uppercase">
-                {recap.find(r => r.position.toLowerCase() === "kasi pemerintahan")?.name || "...................................."}
-              </p>
-              <p className="text-[9px]">{recap.find(r => r.position.toLowerCase() === "kasi pemerintahan")?.niapd || ""}</p>
-            </div>
+            
+            {view === "monthly" && (
+              <>
+                <div className="w-1/3 text-center flex flex-col items-center justify-end">
+                  <p>Mengetahui,</p>
+                  <p className="uppercase">KEPALA DESA PAGEBANGAN</p>
+                  <div className="h-16"></div>
+                  <p className="font-bold underline uppercase">
+                    {recap.find(r => r.position.toLowerCase() === "kepala desa")?.name || "...................................."}
+                  </p>
+                  <p className="text-[10px]">{recap.find(r => r.position.toLowerCase() === "kepala desa")?.niapd || ""}</p>
+                </div>
+
+                <div className="w-1/3 text-center flex flex-col items-center justify-end">
+                  <p>Pagebangan, {(() => {
+                    const [y, m] = currentMonth.split('-');
+                    const date = new Date(parseInt(y), parseInt(m), 1);
+                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    return `01 ${months[date.getMonth()]} ${date.getFullYear()}`;
+                  })()}</p>
+                  <p>Petugas Daftar Hadir</p>
+                  <div className="h-16"></div>
+                  <p className="font-bold underline uppercase">
+                    {recap.find(r => r.name.toUpperCase().includes("WAHYU BUDI ROHIMAN"))?.name || "...................................."}
+                  </p>
+                  <p className="text-[10px]">{recap.find(r => r.name.toUpperCase().includes("WAHYU BUDI ROHIMAN"))?.niapd || ""}</p>
+                </div>
+              </>
+            )}
+
+            {view === "recap" && (
+              <>
+                <div className="w-1/3"></div>
+                <div className="w-1/3 text-center flex flex-col items-center justify-end">
+                  <p>Kebumen, {(() => {
+                    const [y, m] = currentMonth.split('-');
+                    const date = new Date(parseInt(y), parseInt(m), 1);
+                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    return `02 ${months[date.getMonth()]} ${parseInt(y) + 1}`;
+                  })()}</p>
+                  <p>Kepala Desa Pagebangan</p>
+                  <div className="h-16"></div>
+                  <p className="font-bold underline uppercase">
+                    {recap.find(r => r.position.toLowerCase() === "kepala desa")?.name || "...................................."}
+                  </p>
+                  <p className="text-[10px]">{recap.find(r => r.position.toLowerCase() === "kepala desa")?.niapd || ""}</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -521,7 +650,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4">
             <div className="flex items-center gap-4">
-              <img src={KEBUMEN_LOGO} alt="Kebumen Logo" className="w-12 h-12 object-contain" referrerPolicy="no-referrer" />
+              <img src={logoBase64} alt="Kebumen Logo" className="w-12 h-12 object-contain" referrerPolicy="no-referrer" />
               <div>
                 <h1 className="text-xl font-bold tracking-tight text-slate-900">
                   Desa Pagebangan
@@ -538,6 +667,7 @@ export default function App() {
                 { id: "monthly", label: "Bulanan", icon: CalendarIcon },
                 { id: "recap", label: "Rekapan", icon: FileText },
                 { id: "aparatur", label: "Data Perangkat", icon: UserPlus },
+                { id: "profil", label: "Profil", icon: UserPlus },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -637,7 +767,7 @@ export default function App() {
                         <td className="px-6 py-4 text-sm text-slate-500">{log.time || "--:--"}</td>
                         <td className="px-6 py-4 text-center">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusColor(log.status || (getDayInfo(currentDate).holiday ? getDayInfo(currentDate).holiday?.type : (getDayInfo(currentDate).isWeekend ? "LP" : null)))}`}>
-                            {log.status || (getDayInfo(currentDate).holiday ? (getDayInfo(currentDate).holiday?.type === "LN" ? "Libur Nasional (LN)" : "Cuti Bersama (CB)") : (getDayInfo(currentDate).isWeekend ? "Libur Akhir Pekan" : "Belum Absen"))}
+                            {log.status || (getDayInfo(currentDate).holiday ? (getDayInfo(currentDate).holiday?.type === "L" ? "Libur Nasional (L)" : "Cuti Bersama (C)") : (getDayInfo(currentDate).isWeekend ? "Libur Akhir Pekan" : "Belum Absen"))}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
@@ -718,6 +848,20 @@ export default function App() {
                   <CheckCircle2 className="w-4 h-4" />
                   Isi Otomatis Semua
                 </button>
+                <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                  <button 
+                    onClick={() => setPrintOrientation("portrait")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${printOrientation === "portrait" ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50"}`}
+                  >
+                    Portrait
+                  </button>
+                  <button 
+                    onClick={() => setPrintOrientation("landscape")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${printOrientation === "landscape" ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50"}`}
+                  >
+                    Landscape
+                  </button>
+                </div>
                 <button 
                   onClick={() => handlePrint("recap")}
                   className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all text-sm font-bold shadow-lg shadow-indigo-200"
@@ -732,7 +876,7 @@ export default function App() {
             <div className="bg-white p-8 md:p-12 shadow-xl rounded-2xl border border-slate-200 print:shadow-none print:border-none print:p-0">
               {/* Kop Surat */}
               <div className="relative flex items-center justify-center mb-8 border-b-4 border-double border-slate-900 pb-6">
-                <img src={KEBUMEN_LOGO} alt="Kebumen Logo" className="absolute left-0 w-24 h-24 object-contain print:w-20 print:h-20" referrerPolicy="no-referrer" />
+                <img src={logoBase64} alt="Kebumen Logo" className="absolute left-0 w-24 h-24 object-contain print:w-20 print:h-20" referrerPolicy="no-referrer" />
                 <div className="text-center">
                   <h3 className="text-lg md:text-xl font-bold">PEMERINTAH KABUPATEN KEBUMEN</h3>
                   <h3 className="text-lg md:text-xl font-bold">KECAMATAN KARANGGAYAM</h3>
@@ -745,25 +889,27 @@ export default function App() {
               <div className="text-center mb-8">
                 <h4 className="font-bold underline uppercase">REKAPITULASI DAFTAR KEHADIRAN APARATUR PEMERINTAH DESA</h4>
                 <h4 className="font-bold uppercase">DESA PAGEBANGAN KECAMATAN KARANGGAYAM</h4>
-                <div className="flex justify-center gap-8 mt-4 font-bold text-sm">
+                <div className="flex justify-start gap-12 mt-4 font-bold text-sm">
                   <span>BULAN : {monthName}</span>
                   <span>TAHUN : {year}</span>
-                  <span>HARI KERJA : {workingDays} HARI</span>
                 </div>
               </div>
 
               <table className="w-full border-collapse border-2 border-slate-900 text-xs">
                 <thead>
-                  <tr className="bg-slate-100">
-                    <th rowSpan={2} className="border-2 border-slate-900 px-2 py-3 text-center w-10">NO</th>
-                    <th rowSpan={2} className="border-2 border-slate-900 px-4 py-3 text-center">NAMA</th>
-                    <th rowSpan={2} className="border-2 border-slate-900 px-4 py-3 text-center">NIAPD</th>
-                    <th rowSpan={2} className="border-2 border-slate-900 px-4 py-3 text-center">JABATAN</th>
-                    <th rowSpan={2} className="border-2 border-slate-900 px-2 py-3 text-center w-16">HADIR</th>
-                    <th colSpan={5} className="border-2 border-slate-900 px-2 py-1 text-center">JUMLAH HARI TIDAK HADIR</th>
-                    <th rowSpan={2} className="border-2 border-slate-900 px-4 py-3 text-center w-24">KET</th>
+                  <tr className="bg-white">
+                    <th rowSpan={3} className="border-2 border-slate-900 px-2 py-3 text-center w-10">NO</th>
+                    <th rowSpan={3} className="border-2 border-slate-900 px-4 py-3 text-center">NAMA</th>
+                    <th rowSpan={3} className="border-2 border-slate-900 px-4 py-3 text-center">JABATAN</th>
+                    <th rowSpan={3} className="border-2 border-slate-900 px-4 py-3 text-center">NIAPD</th>
+                    <th rowSpan={3} className="border-2 border-slate-900 px-2 py-3 text-center w-16">HADIR</th>
+                    <th colSpan={5} className="border-2 border-slate-900 px-2 py-1 text-center">JUMLAH HARI</th>
+                    <th rowSpan={3} className="border-2 border-slate-900 px-4 py-3 text-center w-24">KET</th>
                   </tr>
-                  <tr className="bg-slate-100">
+                  <tr className="bg-white">
+                    <th colSpan={5} className="border-2 border-slate-900 px-2 py-1 text-center">TIDAK HADIR</th>
+                  </tr>
+                  <tr className="bg-white">
                     <th className="border-2 border-slate-900 px-1 py-2 text-center w-10">IJIN</th>
                     <th className="border-2 border-slate-900 px-1 py-2 text-center w-10">SAKIT</th>
                     <th className="border-2 border-slate-900 px-1 py-2 text-center w-10">CUTI</th>
@@ -776,8 +922,8 @@ export default function App() {
                     <tr key={item.id}>
                       <td className="border-2 border-slate-900 px-2 py-2 text-center">{idx + 1}</td>
                       <td className="border-2 border-slate-900 px-4 py-2 font-bold uppercase">{item.name}</td>
-                      <td className="border-2 border-slate-900 px-4 py-2 font-mono text-[10px]">{item.niapd}</td>
                       <td className="border-2 border-slate-900 px-4 py-2 uppercase">{item.position}</td>
+                      <td className="border-2 border-slate-900 px-4 py-2 font-mono text-[10px] text-center">{item.niapd}</td>
                       <td className="border-2 border-slate-900 px-2 py-2 text-center font-bold">{item.stats.hadir}</td>
                       <td className="border-2 border-slate-900 px-1 py-2 text-center">{item.stats.ijin}</td>
                       <td className="border-2 border-slate-900 px-1 py-2 text-center">{item.stats.sakit}</td>
@@ -799,6 +945,16 @@ export default function App() {
                       </td>
                     </tr>
                   ))}
+                  <tr className="bg-slate-100 font-bold">
+                    <td colSpan={4} className="border-2 border-slate-900 px-4 py-2 text-center">JUMLAH</td>
+                    <td className="border-2 border-slate-900 px-2 py-2 text-center">{recap.reduce((acc, curr) => acc + curr.stats.hadir, 0)}</td>
+                    <td className="border-2 border-slate-900 px-1 py-2 text-center">{recap.reduce((acc, curr) => acc + curr.stats.ijin, 0)}</td>
+                    <td className="border-2 border-slate-900 px-1 py-2 text-center">{recap.reduce((acc, curr) => acc + curr.stats.sakit, 0)}</td>
+                    <td className="border-2 border-slate-900 px-1 py-2 text-center">{recap.reduce((acc, curr) => acc + curr.stats.cuti, 0)}</td>
+                    <td className="border-2 border-slate-900 px-1 py-2 text-center">{recap.reduce((acc, curr) => acc + curr.stats.dinas, 0)}</td>
+                    <td className="border-2 border-slate-900 px-1 py-2 text-center">{recap.reduce((acc, curr) => acc + curr.stats.tk, 0)}</td>
+                    <td className="border-2 border-slate-900 px-1 py-1"></td>
+                  </tr>
                 </tbody>
               </table>
 
@@ -813,16 +969,27 @@ export default function App() {
                     <p>Ijin (I) {recap.reduce((acc, curr) => acc + curr.stats.ijin, 0)} Orang</p>
                     <p>Sakit (S) {recap.reduce((acc, curr) => acc + curr.stats.sakit, 0)} Orang</p>
                     <p>Cuti (C) {recap.reduce((acc, curr) => acc + curr.stats.cuti, 0)} Orang</p>
+                    <p>Dinas (D) {recap.reduce((acc, curr) => acc + curr.stats.dinas, 0)} Orang</p>
                     <p>Tanpa Keterangan (TK) {recap.reduce((acc, curr) => acc + curr.stats.tk, 0)} Orang</p>
+                  </div>
+                  <div className="mt-8 border border-slate-300 p-2 text-xs">
+                    <p>Keterangan</p>
+                    <p>Dinas (D) yaitu Aparatur Pemerintah Desa pada hari yang berkenan melaksanakan perjalanan dinas dalam daerah atau perjalanan dinas luar daerah.</p>
                   </div>
                 </div>
                 <div className="text-center flex flex-col items-center justify-end">
-                  <p>Kebumen, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  <p>Kebumen, {(() => {
+                    const [y, m] = currentMonth.split('-');
+                    const date = new Date(parseInt(y), parseInt(m), 1);
+                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    return `02 ${months[date.getMonth()]} ${parseInt(y) + 1}`;
+                  })()}</p>
                   <p>Kepala Desa Pagebangan</p>
                   <div className="h-24"></div>
                   <p className="font-bold underline uppercase">
                     {recap.find(r => r.position.toLowerCase() === "kepala desa")?.name || "...................................."}
                   </p>
+                  <p className="text-[10px]">{recap.find(r => r.position.toLowerCase() === "kepala desa")?.niapd || ""}</p>
                 </div>
               </div>
             </div>
@@ -847,6 +1014,20 @@ export default function App() {
                     className="bg-transparent border-none focus:ring-0 text-sm font-bold text-slate-700 cursor-pointer"
                   />
                 </div>
+                <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                  <button 
+                    onClick={() => setPrintOrientation("portrait")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${printOrientation === "portrait" ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50"}`}
+                  >
+                    Portrait
+                  </button>
+                  <button 
+                    onClick={() => setPrintOrientation("landscape")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${printOrientation === "landscape" ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50"}`}
+                  >
+                    Landscape
+                  </button>
+                </div>
                 <button 
                   onClick={() => handlePrint("monthly")}
                   className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all text-sm font-bold shadow-lg shadow-indigo-200"
@@ -860,7 +1041,7 @@ export default function App() {
             <div className="bg-white p-4 md:p-8 shadow-xl rounded-2xl border border-slate-200 print:shadow-none print:border-none print:p-0 overflow-x-auto">
               {/* Kop Surat */}
               <div className="relative flex items-center justify-center mb-8 border-b-4 border-double border-slate-900 pb-6">
-                <img src={KEBUMEN_LOGO} alt="Kebumen Logo" className="absolute left-0 w-20 h-20 object-contain" referrerPolicy="no-referrer" />
+                <img src={logoBase64} alt="Kebumen Logo" className="absolute left-0 w-20 h-20 object-contain" referrerPolicy="no-referrer" />
                 <div className="text-center">
                   <h3 className="text-lg font-bold">PEMERINTAH KABUPATEN KEBUMEN</h3>
                   <h3 className="text-lg font-bold">KECAMATAN KARANGGAYAM</h3>
@@ -878,30 +1059,31 @@ export default function App() {
 
               <table className="w-full border-collapse border-2 border-slate-900 text-[9px]">
                 <thead>
-                  <tr className="bg-emerald-500 text-white">
+                  <tr className="bg-[#92d050] text-black">
                     <th rowSpan={2} className="border-2 border-slate-900 px-1 py-2 text-center w-6">NO.</th>
                     <th rowSpan={2} className="border-2 border-slate-900 px-2 py-2 text-center w-32">N A M A</th>
                     <th rowSpan={2} className="border-2 border-slate-900 px-2 py-2 text-center w-24">NIAPD</th>
                     <th colSpan={31} className="border-2 border-slate-900 px-1 py-1 text-center">T A N G G A L</th>
-                    <th colSpan={6} className="border-2 border-slate-900 px-1 py-1 text-center">KET</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">I</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">S</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">C</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">D</th>
+                    <th rowSpan={2} className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">TK</th>
+                    <th colSpan={2} className="border-2 border-slate-900 px-1 py-1 text-center bg-[#ffc000]">JUMLAH</th>
                   </tr>
-                  <tr className="bg-emerald-500 text-white">
+                  <tr className="bg-[#92d050] text-black">
                     {Array.from({ length: 31 }).map((_, i) => {
                       const dateStr = `${currentMonth}-${String(i + 1).padStart(2, '0')}`;
                       const info = getDayInfo(dateStr);
                       const isHoliday = info.holiday || info.isWeekend;
                       return (
-                        <th key={i} className={`border-2 border-slate-900 px-0.5 py-1 text-center w-5 ${isHoliday ? 'bg-rose-600' : ''}`}>
+                        <th key={i} className={`border-2 border-slate-900 px-0.5 py-1 text-center w-5 ${isHoliday ? 'bg-rose-600 text-white' : ''}`}>
                           {i + 1}
                         </th>
                       );
                     })}
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">A</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">I</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">S</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">P</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">C</th>
-                    <th className="border-2 border-slate-900 px-0.5 py-1 text-center w-5">DL</th>
+                    <th className="border-2 border-slate-900 px-1 py-1 text-center w-10 bg-[#ffc000]">HADIR</th>
+                    <th className="border-2 border-slate-900 px-1 py-1 text-center w-10 bg-[#ffc000]">TIDAK<br/>HADIR</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -920,77 +1102,142 @@ export default function App() {
                         
                         let content = "";
                         if (log) {
-                          if (log.status === "Hadir") content = "H";
+                          if (log.status === "Hadir") content = "✓";
                           else if (log.status === "Izin") content = "I";
                           else if (log.status === "Sakit") content = "S";
                           else if (log.status === "Cuti") content = "C";
                           else if (log.status === "Dinas") content = "D";
-                          else if (log.status === "Alpa") content = "A";
+                          else if (log.status === "Alpa") content = "TK";
                         } else if (info.holiday) {
                           content = info.holiday.type;
                         } else if (info.isWeekend) {
                           content = "LP";
+                        } else if (day <= new Date(parseInt(currentMonth.split('-')[0]), parseInt(currentMonth.split('-')[1]), 0).getDate()) {
+                          content = "✓";
                         }
 
+                        const isEditable = !isHoliday && day <= new Date(parseInt(currentMonth.split('-')[0]), parseInt(currentMonth.split('-')[1]), 0).getDate();
+
                         return (
-                          <td key={i} className={`border-2 border-slate-900 px-0.5 py-1 text-center ${isHoliday ? 'bg-rose-50 text-rose-600 font-bold' : ''}`}>
-                            {content}
+                          <td key={i} className={`border-2 border-slate-900 p-0 text-center ${isHoliday ? 'bg-rose-50 text-rose-600 font-bold' : ''}`}>
+                            {isEditable ? (
+                              <input
+                                type="text"
+                                value={content}
+                                onChange={(e) => handleMonthlyGridEdit(item.id, dateStr, e.target.value)}
+                                className="w-full h-full bg-transparent border-none focus:ring-0 text-center p-0 text-[9px] font-bold uppercase"
+                                maxLength={2}
+                              />
+                            ) : (
+                              <span className="block w-full h-full py-1">{content}</span>
+                            )}
                           </td>
                         );
                       })}
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.tk}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.ijin}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.sakit}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.dinas}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center">{item.stats.cuti}</td>
-                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center text-[7px]">{item.note}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.ijin > 0 ? item.stats.ijin : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.sakit > 0 ? item.stats.sakit : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.cuti > 0 ? item.stats.cuti : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.dinas > 0 ? item.stats.dinas : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#d9e1f2]">{item.stats.tk > 0 ? item.stats.tk : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#fff2cc]">{item.stats.hadir > 0 ? item.stats.hadir : ''}</td>
+                      <td className="border-2 border-slate-900 px-0.5 py-1 text-center bg-[#fff2cc]">{(item.stats.ijin + item.stats.sakit + item.stats.cuti + item.stats.tk) > 0 ? (item.stats.ijin + item.stats.sakit + item.stats.cuti + item.stats.tk) : ''}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
 
-              <div className="mt-6 grid grid-cols-3 gap-8 text-[9px]">
-                <div className="space-y-1">
-                  <p className="italic underline">Keterangan Hari Libur Nasional dan Cuti Bersama:</p>
+              <div className="mt-4 flex justify-between text-[10px]">
+                <div className="w-1/3 space-y-1">
+                  <p className="italic">Keterangan Hari Libur Nasional dan Cuti Bersama:</p>
                   {Object.entries(holidays2026)
                     .filter(([date]) => date.startsWith(currentMonth))
                     .map(([date, holiday]) => (
                       <p key={date}>{parseInt(date.split('-')[2])} : {holiday.name}</p>
                     ))
                   }
-                  <div className="mt-4 space-y-0.5">
-                    <p className="italic underline">Keterangan Ketidakhadiran:</p>
-                    <p>L : Libur Nasional/ Hari Raya dan Peringatan Hari Besar</p>
-                    <p>A : Alpa</p>
-                    <p>I : Izin</p>
-                    <p>S : Sakit</p>
-                    <p>P : Pertemuan/ Pelatihan</p>
-                    <p>C : Cuti/ Cuti Bersama</p>
-                    <p>DL : Dinas Luar</p>
+                  <div className="mt-4">
+                    <table className="w-auto text-left border-collapse">
+                      <tbody>
+                        <tr><td colSpan={3} className="italic border border-slate-300 px-1">Keterangan Ketidakhadiran:</td></tr>
+                        <tr><td className="w-6 border border-slate-300 px-1">I</td><td className="w-2 border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Izin</td></tr>
+                        <tr><td className="border border-slate-300 px-1">S</td><td className="border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Sakit</td></tr>
+                        <tr><td className="border border-slate-300 px-1">C</td><td className="border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Cuti</td></tr>
+                        <tr><td className="border border-slate-300 px-1">D</td><td className="border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Dinas Luar</td></tr>
+                        <tr><td className="border border-slate-300 px-1">TK</td><td className="border border-slate-300 px-1">:</td><td className="border border-slate-300 px-1">Tanpa Keterangan</td></tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-                <div className="text-center flex flex-col items-center justify-end">
+                
+                <div className="w-1/3 text-center flex flex-col items-center justify-end">
                   <p>Mengetahui,</p>
-                  <p className="font-bold uppercase">KEPALA DESA PAGEBANGAN</p>
+                  <p className="uppercase">KEPALA DESA PAGEBANGAN</p>
                   <div className="h-16"></div>
                   <p className="font-bold underline uppercase">
-                    {recap.find(r => r.position.toLowerCase() === "kepala desa")?.name}
+                    {recap.find(r => r.position.toLowerCase() === "kepala desa")?.name || "...................................."}
                   </p>
-                  <p className="text-[8px]">{recap.find(r => r.position.toLowerCase() === "kepala desa")?.niapd}</p>
+                  <p className="text-[10px]">{recap.find(r => r.position.toLowerCase() === "kepala desa")?.niapd || ""}</p>
                 </div>
-                <div className="text-center flex flex-col items-center justify-end">
-                  <p>Pagebangan, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+
+                <div className="w-1/3 text-center flex flex-col items-center justify-end">
+                  <p>Pagebangan, {(() => {
+                    const [y, m] = currentMonth.split('-');
+                    const date = new Date(parseInt(y), parseInt(m), 1);
+                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    return `01 ${months[date.getMonth()]} ${date.getFullYear()}`;
+                  })()}</p>
                   <p>Petugas Daftar Hadir</p>
                   <div className="h-16"></div>
                   <p className="font-bold underline uppercase">
-                    {recap.find(r => r.position.toLowerCase() === "kasi pemerintahan")?.name || "...................................."}
+                    {recap.find(r => r.name.toUpperCase().includes("WAHYU BUDI ROHIMAN"))?.name || "...................................."}
                   </p>
-                  <p className="text-[8px]">{recap.find(r => r.position.toLowerCase() === "kasi pemerintahan")?.niapd || ""}</p>
+                  <p className="text-[10px]">{recap.find(r => r.name.toUpperCase().includes("WAHYU BUDI ROHIMAN"))?.niapd || ""}</p>
                 </div>
               </div>
             </div>
           </motion.div>
         )}
+        {view === "profil" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-slate-900">Profil Instansi</h2>
+              <p className="text-slate-500 text-sm">Pengaturan logo dan profil desa</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl">
+              <h3 className="text-lg font-bold mb-4">Logo Pemerintah Daerah</h3>
+              <div className="flex items-start gap-6">
+                <div className="w-32 h-32 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center bg-slate-50 overflow-hidden">
+                  <img src={logoBase64} alt="Logo" className="w-full h-full object-contain p-2" />
+                </div>
+                <div className="flex-1 space-y-4">
+                  <p className="text-sm text-slate-500">
+                    Logo ini akan digunakan pada kop surat di semua laporan cetak (Harian, Bulanan, dan Rekapan).
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <label className="flex items-center justify-center w-full px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg cursor-pointer hover:bg-indigo-100 transition-colors font-medium text-sm">
+                      Pilih File Logo Baru
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleLogoSelect}
+                      />
+                    </label>
+                    <button 
+                      onClick={saveLogo}
+                      className="flex items-center justify-center w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
+                    >
+                      Simpan Logo Permanen
+                    </button>
+                    <p className="text-xs text-slate-400 mt-1 text-center">Format: JPG, PNG. Maks: 2MB.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {view === "aparatur" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
